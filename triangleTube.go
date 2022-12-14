@@ -57,7 +57,7 @@ func (b *TriangleTube) ProcessCommand(c []byte) (r []byte, err error) {
 		// Process command
 		switch command {
 		case readInputRegisters:
-			registerValue, err = b.readInputRegister(reg)
+			registerValue, err = b.readInputRegister(makeUint(reg))
 			log.Println("Reg Value", registerValue)
 
 		case readHoldingRegisters:
@@ -101,7 +101,7 @@ func makeBytes(u uint16) (b []byte) {
 	return b
 }
 
-func makeUint([]byte) uint16 {
-	return 0
+func makeUint(b []byte) uint16 {
+	return binary.BigEndian.Uint16(b)
 
 }
