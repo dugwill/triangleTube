@@ -63,7 +63,7 @@ func NewBoiler(ID int) (b *TriangleTube, err error) {
 
 func (b *TriangleTube) Update() (err error) {
 
-	results, err := b.client.ReadDiscreteInputs(boilerSupplyTemp, 2)
+	results, err := b.client.ReadInputRegisters(boilerSupplyTemp, 1)
 
 	if err != nil {
 		fmt.Println("Error reading Boiler temp")
