@@ -31,10 +31,10 @@ const (
 	reportSlaveID          = 17
 )
 
-// Modbu Configuration
+// Modbus Configuration
 const (
 	baud       = 38400
 	dataLength = 8
-	parity     = "n"
+	parity     = "N"
 	stopBits   = 1
 )

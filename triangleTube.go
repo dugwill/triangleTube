@@ -4,11 +4,15 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"time"
+
+	"github.com/dugwill/modbus-1"
 )
 
 type TriangleTube struct {
 	// Modbus
 	modBusID int
+	client   modbus.Client
 
 	// Input Registers
 	BoilerStatus           int8
@@ -30,12 +34,45 @@ type TriangleTube struct {
 	DhwStorageSetpoint uint16
 }
 
-func NewBoiler(ID int) (b *TriangleTube) {
+func NewBoiler(ID int) (b *TriangleTube, err error) {
 	b = new(TriangleTube)
 	// Set initial status
 	b.modBusID = ID
 
+	// Modbus RTU/ASCII
+	//handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
+	handler := modbus.NewRTUClientHandler("com5")
+	handler.BaudRate = baud
+	handler.DataBits = dataLength
+	handler.Parity = parity
+	handler.StopBits = stopBits
+	handler.SlaveId = byte(b.modBusID)
+	handler.Timeout = 5 * time.Second
+
+	if err = handler.Connect(); err != nil {
+		err = fmt.Errorf("error opening boiler port: %v", err)
+		return
+	}
+
+	//defer handler.Close()
+
+	b.client = modbus.NewClient(handler)
+
 	return
+}
+
+func (b *TriangleTube) Update() (err error) {
+
+	results, err := b.client.ReadDiscreteInputs(boilerSupplyTemp, 2)
+
+	if err != nil {
+		fmt.Println("Error reading Boiler temp")
+		return
+	}
+
+	b.BoilerSupplyTemp = makeUint(results)
+
+	return nil
 }
 
 func (b *TriangleTube) ProcessCommand(c []byte) (r []byte, err error) {
