@@ -3,7 +3,6 @@ package triangleTube
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/dugwill/modbus-1"
@@ -18,13 +17,13 @@ type TriangleTube struct {
 	BoilerStatus           int8
 	LockoutStatus1         uint16
 	LockoutStatus2         uint16
-	BoilerSupplyTemp       uint16
-	BoilerReturnTemp       uint16
-	BoilerFlueTemp         uint16
-	OutdoorTemp            uint16
+	BoilerSupplyTemp       float32
+	BoilerReturnTemp       float32
+	BoilerFlueTemp         float32
+	OutdoorTemp            float32
 	FlameIonizationCurrent uint16
 	BoilerFiringRate       uint16
-	BoilerSetpoint         uint16
+	BoilerSetpoint         float32
 
 	// Holding registers
 	ChDemand           uint16
@@ -70,11 +69,12 @@ func (b *TriangleTube) Update() (err error) {
 		return
 	}
 
-	b.BoilerSupplyTemp = makeUint(results)
+	b.BoilerSupplyTemp = makeTemp(results)
 
 	return nil
 }
 
+/*
 func (b *TriangleTube) ProcessCommand(c []byte) (r []byte, err error) {
 
 	// validate command input
@@ -107,6 +107,7 @@ func (b *TriangleTube) ProcessCommand(c []byte) (r []byte, err error) {
 
 }
 
+
 func (b *TriangleTube) readInputRegister(r uint16) (v uint16, err error) {
 	switch r {
 	case boilerSupplyTemp:
@@ -120,16 +121,17 @@ func (b *TriangleTube) readInputRegister(r uint16) (v uint16, err error) {
 		return 0, err
 	}
 }
+*/
 
-func (b *TriangleTube) getBoilerSupplyTemp() uint16 {
+func (b *TriangleTube) getBoilerSupplyTemp() float32 {
 	return b.BoilerSupplyTemp
 }
 
-func (b *TriangleTube) getBoilerReturnTemp() uint16 {
+func (b *TriangleTube) getBoilerReturnTemp() float32 {
 	return b.BoilerReturnTemp
 }
 
-func (b *TriangleTube) getOutdoorTemp() uint16 {
+func (b *TriangleTube) getOutdoorTemp() float32 {
 	return b.BoilerSupplyTemp
 }
 
@@ -140,5 +142,13 @@ func makeBytes(u uint16) (b []byte) {
 
 func makeUint(b []byte) uint16 {
 	return binary.BigEndian.Uint16(b)
+}
 
+func CtoF(c uint16) float32 {
+	return float32((c)*9/5) + 32
+}
+
+func makeTemp(b []byte) float32 {
+	celcius := makeUint(b) / 10
+	return CtoF(celcius)
 }
