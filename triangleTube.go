@@ -12,6 +12,7 @@ type TriangleTube struct {
 	// Modbus
 	modBusID int
 	client   modbus.Client
+	slaveID  uint16
 
 	// Input Registers
 	BoilerStatus           int8
@@ -33,14 +34,14 @@ type TriangleTube struct {
 	DhwStorageSetpoint uint16
 }
 
-func NewBoiler(ID int) (b *TriangleTube, err error) {
+func NewBoiler(ID int, comPort string) (b *TriangleTube, err error) {
 	b = new(TriangleTube)
 	// Set initial status
 	b.modBusID = ID
 
 	// Modbus RTU/ASCII
 	//handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
-	handler := modbus.NewRTUClientHandler("com5")
+	handler := modbus.NewRTUClientHandler(comPort)
 	handler.BaudRate = baud
 	handler.DataBits = dataLength
 	handler.Parity = parity
@@ -63,13 +64,30 @@ func NewBoiler(ID int) (b *TriangleTube, err error) {
 func (b *TriangleTube) Update() (err error) {
 
 	results, err := b.client.ReadInputRegisters(boilerSupplyTemp, 1)
+	if err != nil {
+		fmt.Println("Error reading Boiler temp")
+		return
+	}
+	b.BoilerSupplyTemp = makeTemp(results)
 
+	results, err = b.client.ReadInputRegisters(boilerReturnTemp, 1)
+	if err != nil {
+		fmt.Println("Error reading Boiler return temp")
+		return
+	}
+	b.BoilerReturnTemp = makeTemp2(results)
+
+	return nil
+}
+
+func (b *TriangleTube) ReportSlaveID() (err error) {
+	results, err := b.client.ReadInputRegisters(reportSlaveID, 1)
 	if err != nil {
 		fmt.Println("Error reading Boiler temp")
 		return
 	}
 
-	b.BoilerSupplyTemp = makeTemp(results)
+	b.slaveID = makeUint(results)
 
 	return nil
 }
@@ -150,5 +168,10 @@ func CtoF(c uint16) float32 {
 
 func makeTemp(b []byte) float32 {
 	celcius := makeUint(b) / 10
+	return CtoF(celcius)
+}
+
+func makeTemp2(b []byte) float32 {
+	celcius := makeUint(b)
 	return CtoF(celcius)
 }
