@@ -11,8 +11,8 @@ const (
 
 // Input Registers
 const (
-	boilerStatus1           = 0
-	locketStatus2           = 1
+	boilerStatus            = 0
+	locketStatus            = 1
 	boilerSupplyTemp        = 768
 	boilerReturnTemp        = 769
 	boilerFlueTemp          = 771
@@ -38,3 +38,13 @@ const (
 	parity     = "N"
 	stopBits   = 1
 )
+
+// Status Bits
+var manual = uint16(1)
+var dhwMode = uint16(2)
+var chMode = uint16(4)
+var freezeMode = uint16(8)
+var flame = uint16(16)
+var chPump = uint16(32)
+var dhwPump = uint16(64)
+var system = uint16(128)
