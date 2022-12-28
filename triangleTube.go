@@ -14,6 +14,7 @@ type TriangleTube struct {
 	ModBusID int           `json:"modbusId"`
 	Client   modbus.Client `json:"-"`
 	SlaveID  uint16        `json:"-"`
+	ReadTime string        `json:"time"`
 
 	// Boiler Status
 	PcManualMode         bool `json:"pcManualMode"`
@@ -102,6 +103,8 @@ func (b *TriangleTube) Update() (err error) {
 	b.FlameIonizationCurrent = makeUint(results[12:14])
 	b.BoilerFiringRate = makeUint(results[14:16])
 	b.BoilerSetpoint = makeTemp2(results[16:18])
+
+	b.ReadTime = time.Now().String()
 
 	return nil
 }
@@ -251,11 +254,22 @@ func (b *TriangleTube) PrintStatus() {
 	fmt.Printf("Boiler Set Point: %v\n", b.GetBoilerSetPoint())
 }
 
-func (b *TriangleTube) PrintJson() {
+func (b *TriangleTube) PrintJsonIndent() {
 	var boilerJson []byte
 	var err error
 
 	if boilerJson, err = json.MarshalIndent(b, "  ", "  "); err != nil {
+		fmt.Println("Error marshaling boiler data: ", err)
+	}
+
+	fmt.Printf("Boiler Data: \n%s\n", boilerJson)
+}
+
+func (b *TriangleTube) PrintJson() {
+	var boilerJson []byte
+	var err error
+
+	if boilerJson, err = json.Marshal(b); err != nil {
 		fmt.Println("Error marshaling boiler data: ", err)
 	}
 
