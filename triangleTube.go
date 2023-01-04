@@ -45,6 +45,9 @@ type TriangleTube struct {
 	ChSetpoint         uint16 `json:"chSetPoint"`
 	Ch1MaxSetpoint     uint16 `json:"ch1MaxSetPoint"`
 	DhwStorageSetpoint uint16 `json:"dhwStorageSetPoint"`
+
+	// Zones
+	ZoneMap map[string]*zone `json:"zoneMap"`
 }
 
 func NewBoiler(ID int, comPort string) (b *TriangleTube, err error) {
@@ -68,6 +71,8 @@ func NewBoiler(ID int, comPort string) (b *TriangleTube, err error) {
 	}
 
 	b.Client = modbus.NewClient(handler)
+
+	initGpio()
 
 	return
 }
@@ -153,10 +158,12 @@ func (b *TriangleTube) GetBoilerSetPoint() float32 {
 	return b.BoilerSetpoint
 }
 
+/**
 func makeBytes(u uint16) (b []byte) {
 	binary.LittleEndian.PutUint16(b, uint16(u))
 	return b
 }
+**/
 
 func makeUint(b []byte) uint16 {
 	return binary.BigEndian.Uint16(b)
