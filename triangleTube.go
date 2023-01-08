@@ -14,7 +14,7 @@ type TriangleTube struct {
 	ModBusID int           `json:"modbusId"`
 	Client   modbus.Client `json:"-"`
 	SlaveID  uint16        `json:"-"`
-	ReadTime string        `json:"time"`
+	ReadTime string        `json:"-"`
 
 	// Boiler Status
 	PcManualMode         bool `json:"pcManualMode"`
